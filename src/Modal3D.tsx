@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import gsap from "gsap";
+import { Audio, AudioLoader } from 'three';
 
 const COLORS = {
   SKY_DAY: 0x87ceeb,
@@ -53,21 +53,14 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
   const mountRef = useRef<HTMLDivElement>(null);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isNight, setIsNight] = useState(false);
-  const [selectedMember, setSelectedMember] = useState<THREE.Group | null>(
-    null
-  );
+  const [selectedMember, setSelectedMember] = useState<THREE.Group | null>(null);
 
   useEffect(() => {
     if (!mountRef.current) return;
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(COLORS.SKY_DAY);
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -96,18 +89,9 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
       group.add(head);
 
       if (hairstyle !== "bald") {
-        const hairGeometry =
-          hairstyle === "short"
-            ? new THREE.SphereGeometry(
-                0.26,
-                32,
-                32,
-                0,
-                Math.PI * 2,
-                0,
-                Math.PI / 2
-              )
-            : new THREE.SphereGeometry(0.28, 32, 32);
+        const hairGeometry = hairstyle === "short"
+          ? new THREE.SphereGeometry(0.26, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2)
+          : new THREE.SphereGeometry(0.28, 32, 32);
         const hairMaterial = new THREE.MeshPhongMaterial({ color: hairColor });
         const hair = new THREE.Mesh(hairGeometry, hairMaterial);
         hair.position.y = hairstyle === "short" ? 1.63 * scale : 1.58 * scale;
@@ -135,9 +119,7 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
 
       if (accessory === "glasses") {
         const glassesGeometry = new THREE.TorusGeometry(0.1, 0.02, 16, 100);
-        const glassesMaterial = new THREE.MeshPhongMaterial({
-          color: 0x000000,
-        });
+        const glassesMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
         const leftLens = new THREE.Mesh(glassesGeometry, glassesMaterial);
         leftLens.position.set(-0.1, 1.55 * scale, 0.2);
         leftLens.rotation.y = Math.PI / 2;
@@ -162,15 +144,8 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
       neck.castShadow = true;
       group.add(neck);
 
-      const torsoGeometry = new THREE.CylinderGeometry(
-        0.3,
-        isMale ? 0.4 : 0.45,
-        0.8,
-        32
-      );
-      const torsoMaterial = new THREE.MeshPhongMaterial({
-        color: clothingColor,
-      });
+      const torsoGeometry = new THREE.CylinderGeometry(0.3, isMale ? 0.4 : 0.45, 0.8, 32);
+      const torsoMaterial = new THREE.MeshPhongMaterial({ color: clothingColor });
       const torso = new THREE.Mesh(torsoGeometry, torsoMaterial);
       torso.position.y = 0.9 * scale;
       torso.castShadow = true;
@@ -179,12 +154,7 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
       const createArm = (isLeft: boolean) => {
         const armGroup = new THREE.Group();
 
-        const upperArmGeometry = new THREE.CylinderGeometry(
-          0.08,
-          0.06,
-          0.4,
-          32
-        );
+        const upperArmGeometry = new THREE.CylinderGeometry(0.08, 0.06, 0.4, 32);
         const upperArm = new THREE.Mesh(upperArmGeometry, torsoMaterial);
         upperArm.position.y = -0.2;
         upperArm.castShadow = true;
@@ -247,7 +217,7 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
       const rightLeg = createLeg(false);
       group.add(leftLeg, rightLeg);
 
-      group.scale.set(scale, scale, scale);
+      group.scale.set(scale * 2, scale * 2, scale * 2);
       group.position.set(...position);
       return group;
     };
@@ -257,7 +227,7 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
     if (hasWife) {
       const mother = createFamilyMember({
         skinColor: SKIN_TONES.MEDIUM,
-        position: [-1.5, 10, 0],
+        position: [-3, 10, 0],
         scale: 0.9,
         hairColor: 0x8b4513,
         isMale: false,
@@ -270,7 +240,7 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
 
     const father = createFamilyMember({
       skinColor: SKIN_TONES.DARK,
-      position: [1.5, 10, 0],
+      position: [3, 10, 0],
       scale: 1,
       hairColor: 0x000000,
       isMale: true,
@@ -283,7 +253,7 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
     if (hasSon) {
       const son = createFamilyMember({
         skinColor: SKIN_TONES.MEDIUM,
-        position: [-0.5, 10, 1],
+        position: [-1, 10, 2],
         scale: 0.7,
         hairColor: 0x8b4513,
         isMale: true,
@@ -296,7 +266,7 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
     if (hasDaughter) {
       const daughter = createFamilyMember({
         skinColor: SKIN_TONES.LIGHT,
-        position: [0.5, 10, 1],
+        position: [1, 10, 2],
         scale: 0.6,
         hairColor: 0xffd700,
         isMale: false,
@@ -316,56 +286,79 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
       });
     });
 
-    const groundGeometry = new THREE.PlaneGeometry(20, 20);
-    const groundMaterial = new THREE.MeshPhongMaterial({
+    const groundGeometry = new THREE.PlaneGeometry(40, 40, 100, 100);
+    const groundMaterial = new THREE.MeshPhongMaterial({ 
       color: COLORS.GROUND,
+      vertexColors: true 
     });
     const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = -0.5;
     ground.receiveShadow = true;
+
+    const colors = [];
+    for (let i = 0; i < groundGeometry.attributes.position.count; i++) {
+      if (Math.random() > 0.6) {
+        colors.push(0, 0.5 + Math.random() * 0.5, 0);
+      } else {
+        colors.push(0.6, 0.4, 0.2);
+      }
+    }
+    groundGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
     scene.add(ground);
+
+    for (let i = 0; i < 1000; i++) {
+      const grassGeometry = new THREE.PlaneGeometry(0.1, 0.3);
+      const grassMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0x00ff00, 
+        side: THREE.DoubleSide 
+      });
+      const grass = new THREE.Mesh(grassGeometry, grassMaterial);
+      grass.position.set(
+        Math.random() * 40 - 20,
+        0,
+        Math.random() * 40 - 20
+      );
+      grass.rotation.y = Math.random() * Math.PI;
+      scene.add(grass);
+    }
 
     const createHouse = () => {
       const house = new THREE.Group();
 
-      const wallGeometry = new THREE.BoxGeometry(3, 2, 2);
-      const wallMaterial = new THREE.MeshPhongMaterial({
-        color: COLORS.HOUSE_WALL,
-      });
+      const wallGeometry = new THREE.BoxGeometry(6, 4, 4);
+      const wallMaterial = new THREE.MeshPhongMaterial({ color: COLORS.HOUSE_WALL });
       const walls = new THREE.Mesh(wallGeometry, wallMaterial);
       walls.castShadow = true;
       walls.receiveShadow = true;
       house.add(walls);
 
-      const roofGeometry = new THREE.ConeGeometry(2.5, 1, 4);
-      const roofMaterial = new THREE.MeshPhongMaterial({
-        color: COLORS.HOUSE_ROOF,
-      });
+      const roofGeometry = new THREE.ConeGeometry(5, 2, 4);
+      const roofMaterial = new THREE.MeshPhongMaterial({ color: COLORS.HOUSE_ROOF });
       const roof = new THREE.Mesh(roofGeometry, roofMaterial);
-      roof.position.y = 1.5;
+      roof.position.y = 3;
       roof.rotation.y = Math.PI / 4;
       roof.castShadow = true;
       house.add(roof);
 
-      const doorGeometry = new THREE.PlaneGeometry(0.8, 1.5);
-      const doorMaterial = new THREE.MeshPhongMaterial({
-        color: COLORS.HOUSE_ROOF,
-      });
+      const doorGeometry = new THREE.PlaneGeometry(1.6, 3);
+      const doorMaterial = new THREE.MeshPhongMaterial({ color: COLORS.HOUSE_ROOF });
       const door = new THREE.Mesh(doorGeometry, doorMaterial);
-      door.position.set(0, -0.25, 1.01);
+      door.position.set(0, -0.5, 2.01);
       house.add(door);
 
-      const windowGeometry = new THREE.PlaneGeometry(0.5, 0.5);
-      const windowMaterial = new THREE.MeshPhongMaterial({ color: 0xaaaaff });
+      const windowMaterial = new THREE.MeshPhongMaterial({ color: 0x87ceeb });
+      const windowGeometry = new THREE.PlaneGeometry(1, 1);
+      
       const leftWindow = new THREE.Mesh(windowGeometry, windowMaterial);
-      leftWindow.position.set(-0.8, 0.2, 1.01);
+      leftWindow.position.set(-2, 0.5, 2.01);
       house.add(leftWindow);
       const rightWindow = new THREE.Mesh(windowGeometry, windowMaterial);
-      rightWindow.position.set(0.8, 0.2, 1.01);
+      rightWindow.position.set(2, 0.5, 2.01);
       house.add(rightWindow);
 
-      house.position.set(0, 0.5, -3);
+      house.position.set(-10, 0, -5);
       return house;
     };
 
@@ -375,20 +368,16 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
     const createTree = (x: number, z: number) => {
       const tree = new THREE.Group();
 
-      const trunkGeometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 8);
-      const trunkMaterial = new THREE.MeshPhongMaterial({
-        color: COLORS.TREE_TRUNK,
-      });
+      const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.2, 2, 8);
+      const trunkMaterial = new THREE.MeshPhongMaterial({ color: COLORS.TREE_TRUNK });
       const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
       trunk.castShadow = true;
       tree.add(trunk);
 
-      const leavesGeometry = new THREE.ConeGeometry(0.5, 1, 8);
-      const leavesMaterial = new THREE.MeshPhongMaterial({
-        color: COLORS.TREE_LEAVES,
-      });
+      const leavesGeometry = new THREE.SphereGeometry(1, 8, 8);
+      const leavesMaterial = new THREE.MeshPhongMaterial({ color: COLORS.TREE_LEAVES });
       const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
-      leaves.position.y = 1;
+      leaves.position.y = 1.5;
       leaves.castShadow = true;
       tree.add(leaves);
 
@@ -397,14 +386,154 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
     };
 
     const trees = [
-      createTree(-3, -3),
-      createTree(3, -3),
-      createTree(-3, 3),
-      createTree(3, 3),
+      createTree(8, -8),
+      createTree(-8, 8),
+      createTree(12, 5),
+      createTree(-12, -5),
     ];
     trees.forEach((tree) => scene.add(tree));
 
-    const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+    const createCloud = (x: number, y: number, z: number) => {
+      const cloud = new THREE.Group();
+      const cloudMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+      for (let i = 0; i < 5; i++) {
+        const cloudPart = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), cloudMaterial);
+        cloudPart.position.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+        cloud.add(cloudPart);
+      }
+      cloud.position.set(x, y, z);
+      return cloud;
+    };
+
+    const clouds = [
+      createCloud(5, 10, -10),
+      createCloud(-8, 12, -5),
+      createCloud(10, 11, -8),
+    ];
+    clouds.forEach(cloud => scene.add(cloud));
+
+    const createMountain = (x: number, z: number, height: number) => {
+      const mountainGeometry = new THREE.ConeGeometry(8, height, 32);
+      const mountainMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0x808080,
+        flatShading: true 
+      });
+      const mountain = new THREE.Mesh(mountainGeometry, mountainMaterial);
+      mountain.position.set(x, height / 2, z);
+      mountain.castShadow = true;
+      
+      return mountain;
+    };
+
+    const mountains = [
+      createMountain(-25, -25, 15),
+      createMountain(25, -20, 12),
+      createMountain(-20, 25, 18),
+    ];
+    mountains.forEach(mountain => scene.add(mountain));
+
+    const createFlower = (x: number, z: number) => {
+      const flower = new THREE.Group();
+      const stemGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8);
+      const stemMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+      const stem = new THREE.Mesh(stemGeometry, stemMaterial);
+      flower.add(stem);
+
+      const petalGeometry = new THREE.CircleGeometry(0.2, 5);
+      const petalMaterial = new THREE.MeshPhongMaterial({ color: Math.random() * 0xffffff });
+      for (let i = 0; i < 5; i++) {
+        const petal = new THREE.Mesh(petalGeometry, petalMaterial);
+        petal.position.y = 0.25;
+        petal.rotation.x = -Math.PI / 2;
+        petal.rotation.y = (i / 5) * Math.PI * 2;
+        flower.add(petal);
+      }
+
+      flower.position.set(x, 0, z);
+      return flower;
+    };
+
+    for (let i = 0; i < 50; i++) {
+      const flower = createFlower(Math.random() * 40 - 20, Math.random() * 40 - 20);
+      scene.add(flower);
+    }
+
+    const createRoad = () => {
+      const roadGeometry = new THREE.PlaneGeometry(40, 4);
+      const roadMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
+      const road = new THREE.Mesh(roadGeometry, roadMaterial);
+      road.rotation.x = -Math.PI / 2;
+      road.position.set(0, 0.01, 0);
+      scene.add(road);
+
+      // Add road markings
+      const markingGeometry = new THREE.PlaneGeometry(1, 0.1);
+      const markingMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+      for (let i = -19; i < 20; i += 2) {
+        const marking = new THREE.Mesh(markingGeometry, markingMaterial);
+        marking.rotation.x = -Math.PI / 2;
+        marking.position.set(i, 0.02, 0);
+        scene.add(marking);
+      }
+    };
+
+    createRoad();
+
+    const createCity = (x: number, z: number) => {
+      const city = new THREE.Group();
+      const buildingCount = Math.floor(Math.random() * 10) + 5;
+
+      for (let i = 0; i < buildingCount; i++) {
+        const height = Math.random() * 5 + 2;
+        const geometry = new THREE.BoxGeometry(1, height, 1);
+        const material = new THREE.MeshPhongMaterial({ color: 0x808080 });
+        const building = new THREE.Mesh(geometry, material);
+        building.position.set(
+          Math.random() * 4 - 2,
+          height / 2,
+          Math.random() * 4 - 2
+        );
+        city.add(building);
+      }
+
+      city.position.set(x, 0, z);
+      scene.add(city);
+    };
+
+    createCity(30, 15);
+    createCity(-30, -15);
+
+    const createWaterfall = (x: number, y: number, z: number) => {
+      const waterfallGeometry = new THREE.PlaneGeometry(2, 10, 10, 10);
+      const waterfallMaterial = new THREE.MeshPhongMaterial({
+        color: 0x3498db,
+        transparent: true,
+        opacity: 0.8,
+      });
+      const waterfall = new THREE.Mesh(waterfallGeometry, waterfallMaterial);
+      waterfall.position.set(x, y, z);
+      waterfall.rotation.x = -Math.PI / 2;
+
+      // Animate waterfall
+      const positionAttribute = waterfallGeometry.getAttribute('position');
+      const animate = () => {
+        const time = Date.now() * 0.001;
+        for (let i = 0; i < positionAttribute.count; i++) {
+          const y = positionAttribute.getY(i);
+          const newY = y + Math.sin(time + i * 0.1) * 0.05;
+          positionAttribute.setY(i, newY);
+        }
+        positionAttribute.needsUpdate = true;
+        requestAnimationFrame(animate);
+      };
+      animate();
+
+      scene.add(waterfall);
+    };
+
+    createWaterfall(-20, 10, 20);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
 
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
@@ -416,75 +545,128 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
     directionalLight.shadow.camera.far = 50;
     scene.add(directionalLight);
 
-    camera.position.set(0, 3, 8);
+    camera.position.set(0, 10, 20);
+    camera.lookAt(0, 0, 0);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
 
+    const audioLoader = new AudioLoader();
+    const listener = new THREE.AudioListener();
+    camera.add(listener);
+    const sound = new Audio(listener);
+
+    audioLoader.load('path/to/background_music.mp3', (buffer) => {
+      sound.setBuffer(buffer);
+      sound.setLoop(true);
+      sound.setVolume(0.5);
+      sound.play();
+    });
+
+    const createSound = (path: string, loop: boolean = false, volume: number = 1) => {
+      const sound = new Audio(listener);
+      audioLoader.load(path, (buffer) => {
+        sound.setBuffer(buffer);
+        sound.setLoop(loop);
+        sound.setVolume(volume);
+      });
+      return sound;
+    };
+
+    const windSound = createSound('path/to/wind_sound.mp3', true, 0.2);
+    const birdSound = createSound('path/to/bird_chirping.mp3', true, 0.1);
+
+    windSound.play();
+    birdSound.play();
+
+    const playInteractionSound = () => {
+      const interactionSound = new Audio(listener);
+      audioLoader.load('path/to/interaction_sound.mp3', (buffer) => {
+        interactionSound.setBuffer(buffer);
+        interactionSound.setVolume(0.7);
+        interactionSound.play();
+      });
+    };
+
+    const moveCameraToMember = (member: THREE.Group) => {
+      const targetPosition = member.position.clone().add(new THREE.Vector3(0, 2, 5));
+      gsap.to(camera.position, {
+        duration: 2,
+        x: targetPosition.x,
+        y: targetPosition.y,
+        z: targetPosition.z,
+        onUpdate: () => {
+          camera.lookAt(member.position);
+        },
+        onComplete: () => {
+          playInteractionSound();
+        }
+      });
+    };
+
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
-    const loader = new GLTFLoader();
-    loader.load(
-      "path/to/your/3d/model.gltf",
-      (gltf) => {
-        const model = gltf.scene;
-        model.scale.set(0.5, 0.5, 0.5);
-        model.position.set(0, 0, 2);
-        scene.add(model);
-        setLoadingProgress(100);
-      },
-      (xhr) => {
-        setLoadingProgress((xhr.loaded / xhr.total) * 100);
-      },
-      (error) => {
-        console.error("An error happened", error);
+    const onMouseClick = (event: MouseEvent) => {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(familyMembers, true);
+
+      if (intersects.length > 0) {
+        const selectedObject = intersects[0].object;
+        const familyMember = selectedObject.parent;
+        if (familyMember instanceof THREE.Group) {
+          setSelectedMember(familyMember);
+          moveCameraToMember(familyMember);
+        }
       }
-    );
+    };
 
-    const clock = new THREE.Clock();
-    function animate() {
+    window.addEventListener('click', onMouseClick);
+
+    const animateFamilyMember = (member: THREE.Group) => {
+      const head = member.getObjectByName('head');
+      const leftArm = member.getObjectByName('leftArm');
+      const rightArm = member.getObjectByName('rightArm');
+
+      if (head && leftArm && rightArm) {
+        gsap.to(head.rotation, {
+          y: Math.PI / 6,
+          duration: 2,
+          yoyo: true,
+          repeat: -1,
+          ease: 'power1.inOut',
+        });
+
+        gsap.to(leftArm.rotation, {
+          x: Math.PI / 4,
+          duration: 1.5,
+          yoyo: true,
+          repeat: -1,
+          ease: 'power1.inOut',
+        });
+
+        gsap.to(rightArm.rotation, {
+          x: -Math.PI / 4,
+          duration: 1.5,
+          yoyo: true,
+          repeat: -1,
+          ease: 'power1.inOut',
+        });
+      }
+    };
+
+    familyMembers.forEach(animateFamilyMember);
+
+    const animate = () => {
       requestAnimationFrame(animate);
-
-      const time = clock.getElapsedTime();
-
-      familyMembers.forEach((member, index) => {
-        member.position.y += Math.sin(time + index) * 0.001;
-        member.rotation.y = Math.sin(time * 0.5 + index) * 0.1;
-
-        const rightArm = member.getObjectByName("rightArm");
-        if (rightArm) {
-          rightArm.rotation.z = Math.sin(time * 2 + index) * 0.2;
-        }
-
-        const head = member.getObjectByName("head");
-        if (head) {
-          head.rotation.y = Math.sin(time * 1.5 + index) * 0.1;
-        }
-      });
-
-      trees.forEach((tree, index) => {
-        tree.rotation.y = Math.sin(time * 0.2 + index) * 0.05;
-      });
-
-      const dayColor = new THREE.Color(COLORS.SKY_DAY);
-      const nightColor = new THREE.Color(COLORS.SKY_NIGHT);
-      const currentColor = new THREE.Color();
-
-      currentColor
-        .copy(dayColor)
-        .lerp(nightColor, Math.sin(time * 0.1) * 0.5 + 0.5);
-      scene.background = currentColor;
-
-      directionalLight.intensity = Math.cos(time * 0.1) * 0.5 + 0.5;
-      ambientLight.intensity = Math.cos(time * 0.1) * 0.25 + 0.25;
-
-      setIsNight(Math.sin(time * 0.1) > 0);
-
       controls.update();
       renderer.render(scene, camera);
-    }
+    };
+
     animate();
 
     const handleResize = () => {
@@ -492,77 +674,28 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     };
-    window.addEventListener("resize", handleResize);
 
-    const handleClick = (event: MouseEvent) => {
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-      raycaster.setFromCamera(mouse, camera);
-
-      const intersects = raycaster.intersectObjects(familyMembers, true);
-
-      if (intersects.length > 0) {
-        const clickedMember = intersects[0].object.parent;
-        if (clickedMember && clickedMember instanceof THREE.Group) {
-          setSelectedMember(clickedMember);
-        }
-      }
-    };
-    window.addEventListener("click", handleClick);
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("click", handleClick);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('click', onMouseClick);
       mountRef.current?.removeChild(renderer.domElement);
     };
   }, [hasSon, hasDaughter, hasWife, hasOther]);
 
   return (
-    <div>
-      <div ref={mountRef} style={{ width: "100%", height: "100vh" }} />
+    <div ref={mountRef} style={{ width: '100%', height: '100vh' }}>
       {loadingProgress < 100 && (
-        <div
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            background: "rgba(0, 0, 0, 0.5)",
-            color: "white",
-            padding: "20px",
-            borderRadius: "10px",
-          }}
-        >
-          Loading: {loadingProgress.toFixed(2)}%
-        </div>
-      )}
-      <div
-        style={{
-          position: "absolute",
-          top: "10px",
-          left: "10px",
-          color: "white",
-          background: "rgba(0, 0, 0, 0.5)",
-          padding: "5px",
-          borderRadius: "5px",
-        }}
-      >
-        {isNight ? "Night Time" : "Day Time"}
-      </div>
-      {selectedMember && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: "10px",
-            left: "10px",
-            color: "white",
-            background: "rgba(0, 0, 0, 0.5)",
-            padding: "5px",
-            borderRadius: "5px",
-          }}
-        >
-          Selected: {selectedMember.name || "Family Member"}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          fontSize: '24px',
+          color: 'white',
+        }}>
+          Loading: {loadingProgress}%
         </div>
       )}
     </div>

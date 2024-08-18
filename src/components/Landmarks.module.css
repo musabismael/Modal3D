@@ -1,0 +1,49 @@
+.landmarks {
+    position: relative;
+    padding: 60px 0;
+    overflow: hidden;
+  }
+  
+  .canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+  
+  .content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 30px;
+    border-radius: 10px;
+  }
+  
+  .content h2 {
+    color: #2c3e50;
+    font-size: 2.5em;
+    margin-bottom: 30px;
+  }
+  
+  .content ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .content li {
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    padding-left: 25px;
+    position: relative;
+  }
+  
+  .content li::before {
+    content: "🏛️";
+    position: absolute;
+    left: 0;
+  }
+  

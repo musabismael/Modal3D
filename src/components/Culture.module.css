@@ -1,0 +1,40 @@
+.culture {
+    padding: 60px 0;
+    background-color: #ecf0f1;
+  }
+  
+  .content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .content h2 {
+    color: #2c3e50;
+    font-size: 2.5em;
+    margin-bottom: 30px;
+  }
+  
+  .content p {
+    font-size: 1.1em;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  
+  .content ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .content li {
+    margin-bottom: 10px;
+    padding-left: 20px;
+    position: relative;
+  }
+  
+  .content li::before {
+    content: "•";
+    color: #3498db;
+    position: absolute;
+    left: 0;
+  }
+  

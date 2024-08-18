@@ -1,0 +1,54 @@
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 15px 0;
+    z-index: 1000;
+    transition: background-color 0.3s ease;
+  }
+  
+  .scrolled {
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .logo img {
+    height: 40px;
+  }
+  
+  .nav ul {
+    display: flex;
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .nav li {
+    margin-right: 20px;
+  }
+  
+  .nav a {
+    text-decoration: none;
+    color: #2c3e50;
+    font-weight: bold;
+    transition: color 0.3s ease;
+  }
+  
+  .nav a:hover {
+    color: #3498db;
+  }
+  
+  .langSwitch button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-left: 10px;
+  }
+  
+  .langSwitch button:hover {
+    color: #3498db;
+  }
+  

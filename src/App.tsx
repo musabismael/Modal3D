@@ -71,3 +71,52 @@ function App() {
 }
 
 export default App;
+// App.tsx
+// import React, { useEffect, useRef } from 'react';
+// import { gsap } from 'gsap';
+// import { ScrollTrigger } from 'gsap/ScrollTrigger';
+// import Header from './components/Header.tsx';
+// import Hero from './components/Hero.tsx';
+// import About from './components/About.tsx';
+// import Landmarks from './components/Landmarks';
+// import Culture from './components/Culture';
+// import Footer from './components/Footer';
+// import styles from './App.module.css';
+
+// gsap.registerPlugin(ScrollTrigger);
+
+// const App: React.FC = () => {
+//   const sectionsRef = useRef<HTMLDivElement[]>([]);
+
+//   useEffect(() => {
+//     sectionsRef.current.forEach((section, index) => {
+//       gsap.from(section, {
+//         opacity: 0,
+//         y: 50,
+//         duration: 1,
+//         scrollTrigger: {
+//           trigger: section,
+//           start: 'top 80%',
+//           end: 'bottom 20%',
+//           toggleActions: 'play none none reverse',
+//         },
+//       });
+//     });
+//   }, []);
+
+//   return (
+//     <div className={styles.app}>
+//       <Header />
+//       <main>
+//         <Hero />
+//         <About ref={(el) => (sectionsRef.current[0] = el!)} />
+//         <Landmarks ref={(el) => (sectionsRef.current[1] = el!)} />
+//         <Culture ref={(el) => (sectionsRef.current[2] = el!)} />
+//       </main>
+//       <Footer />
+//     </div>
+//   );
+// };
+
+// export default App;
+
