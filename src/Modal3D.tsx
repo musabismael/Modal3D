@@ -59,9 +59,7 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
     if (!mountRef.current) return;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(COLORS.SKY_DAY);
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
@@ -80,7 +78,7 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
     }: FamilyMemberProps) => {
       const group = new THREE.Group();
 
-      const headGeometry = new THREE.SphereGeometry(0.25, 32, 32);
+      const headGeometry = new THREE.SphereGeometry(0.25, 64, 64);
       const headMaterial = new THREE.MeshPhongMaterial({ color: skinColor });
       const head = new THREE.Mesh(headGeometry, headMaterial);
       head.position.y = 1.5 * scale;
@@ -101,41 +99,20 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
 
       const eyeGeometry = new THREE.SphereGeometry(0.05, 32, 32);
       const eyeMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
-      const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+      const irisGeometry = new THREE.SphereGeometry(0.03, 32, 32);
+      const irisMaterial = new THREE.MeshPhongMaterial({ color: 0x4B0082 });
+
+      const leftEye = new THREE.Group();
+      const leftEyeball = new THREE.Mesh(eyeGeometry, eyeMaterial);
+      const leftIris = new THREE.Mesh(irisGeometry, irisMaterial);
+      leftIris.position.z = 0.02;
+      leftEye.add(leftEyeball, leftIris);
       leftEye.position.set(-0.1, 1.55 * scale, 0.18);
       group.add(leftEye);
-      const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+
+      const rightEye = leftEye.clone();
       rightEye.position.set(0.1, 1.55 * scale, 0.18);
       group.add(rightEye);
-
-      const pupilGeometry = new THREE.SphereGeometry(0.02, 32, 32);
-      const pupilMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
-      const leftPupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
-      leftPupil.position.set(-0.1, 1.55 * scale, 0.22);
-      group.add(leftPupil);
-      const rightPupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
-      rightPupil.position.set(0.1, 1.55 * scale, 0.22);
-      group.add(rightPupil);
-
-      if (accessory === "glasses") {
-        const glassesGeometry = new THREE.TorusGeometry(0.1, 0.02, 16, 100);
-        const glassesMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
-        const leftLens = new THREE.Mesh(glassesGeometry, glassesMaterial);
-        leftLens.position.set(-0.1, 1.55 * scale, 0.2);
-        leftLens.rotation.y = Math.PI / 2;
-        group.add(leftLens);
-        const rightLens = new THREE.Mesh(glassesGeometry, glassesMaterial);
-        rightLens.position.set(0.1, 1.55 * scale, 0.2);
-        rightLens.rotation.y = Math.PI / 2;
-        group.add(rightLens);
-      } else if (accessory === "hat") {
-        const hatGeometry = new THREE.ConeGeometry(0.3, 0.3, 32);
-        const hatMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
-        const hat = new THREE.Mesh(hatGeometry, hatMaterial);
-        hat.position.y = 1.8 * scale;
-        hat.castShadow = true;
-        group.add(hat);
-      }
 
       const neckGeometry = new THREE.CylinderGeometry(0.1, 0.15, 0.2, 32);
       const neckMaterial = new THREE.MeshPhongMaterial({ color: skinColor });
@@ -217,6 +194,26 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
       const rightLeg = createLeg(false);
       group.add(leftLeg, rightLeg);
 
+      if (accessory === "glasses") {
+        const glassesGeometry = new THREE.TorusGeometry(0.1, 0.02, 16, 100);
+        const glassesMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+        const leftLens = new THREE.Mesh(glassesGeometry, glassesMaterial);
+        leftLens.position.set(-0.1, 1.55 * scale, 0.2);
+        leftLens.rotation.y = Math.PI / 2;
+        group.add(leftLens);
+        const rightLens = new THREE.Mesh(glassesGeometry, glassesMaterial);
+        rightLens.position.set(0.1, 1.55 * scale, 0.2);
+        rightLens.rotation.y = Math.PI / 2;
+        group.add(rightLens);
+      } else if (accessory === "hat") {
+        const hatGeometry = new THREE.ConeGeometry(0.3, 0.3, 32);
+        const hatMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
+        const hat = new THREE.Mesh(hatGeometry, hatMaterial);
+        hat.position.y = 1.8 * scale;
+        hat.castShadow = true;
+        group.add(hat);
+      }
+
       group.scale.set(scale * 2, scale * 2, scale * 2);
       group.position.set(...position);
       return group;
@@ -286,7 +283,7 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
       });
     });
 
-    const groundGeometry = new THREE.PlaneGeometry(40, 40, 100, 100);
+    const groundGeometry = new THREE.PlaneGeometry(100, 100, 200, 200);
     const groundMaterial = new THREE.MeshPhongMaterial({ 
       color: COLORS.GROUND,
       vertexColors: true 
@@ -308,7 +305,7 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
 
     scene.add(ground);
 
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 2000; i++) {
       const grassGeometry = new THREE.PlaneGeometry(0.1, 0.3);
       const grassMaterial = new THREE.MeshPhongMaterial({ 
         color: 0x00ff00, 
@@ -316,9 +313,9 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
       });
       const grass = new THREE.Mesh(grassGeometry, grassMaterial);
       grass.position.set(
-        Math.random() * 40 - 20,
+        Math.random() * 100 - 50,
         0,
-        Math.random() * 40 - 20
+        Math.random() * 100 - 50
       );
       grass.rotation.y = Math.random() * Math.PI;
       scene.add(grass);
@@ -396,9 +393,9 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
     const createCloud = (x: number, y: number, z: number) => {
       const cloud = new THREE.Group();
       const cloudMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
-      for (let i = 0; i < 5; i++) {
-        const cloudPart = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), cloudMaterial);
-        cloudPart.position.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+      for (let i = 0; i < 10; i++) {
+        const cloudPart = new THREE.Mesh(new THREE.SphereGeometry(0.8 + Math.random() * 0.3, 16, 16), cloudMaterial);
+        cloudPart.position.set(Math.random() * 2 - 1, Math.random() * 1 - 0.5, Math.random() * 2 - 1);
         cloud.add(cloudPart);
       }
       cloud.position.set(x, y, z);
@@ -409,6 +406,10 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
       createCloud(5, 10, -10),
       createCloud(-8, 12, -5),
       createCloud(10, 11, -8),
+      createCloud(-12, 13, 0),
+      createCloud(15, 11, 5),
+      createCloud(-5, 12, 10),
+      createCloud(0, 14, -15),
     ];
     clouds.forEach(cloud => scene.add(cloud));
 
@@ -459,79 +460,104 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
     }
 
     const createRoad = () => {
-      const roadGeometry = new THREE.PlaneGeometry(40, 4);
-      const roadMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
-      const road = new THREE.Mesh(roadGeometry, roadMaterial);
-      road.rotation.x = -Math.PI / 2;
-      road.position.set(0, 0.01, 0);
-      scene.add(road);
+      const roadGroup = new THREE.Group();
+      const laneWidth = 2;
+      const roadLength = 60;
 
-      // Add road markings
-      const markingGeometry = new THREE.PlaneGeometry(1, 0.1);
-      const markingMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
-      for (let i = -19; i < 20; i += 2) {
-        const marking = new THREE.Mesh(markingGeometry, markingMaterial);
-        marking.rotation.x = -Math.PI / 2;
-        marking.position.set(i, 0.02, 0);
-        scene.add(marking);
-      }
-    };
+      for (let i = 0; i < 2; i++) {
+        const laneGeometry = new THREE.PlaneGeometry(roadLength, laneWidth, 100, 1);
+        const roadMaterial = new THREE.MeshPhongMaterial({ color: 0x111111 });
+        const lane = new THREE.Mesh(laneGeometry, roadMaterial);
+        lane.rotation.x = -Math.PI / 2;
+        lane.position.set(0, 0.1, 10 + (i * 3 - 1.5));
+        roadGroup.add(lane);
 
-    createRoad();
-
-    const createCity = (x: number, z: number) => {
-      const city = new THREE.Group();
-      const buildingCount = Math.floor(Math.random() * 10) + 5;
-
-      for (let i = 0; i < buildingCount; i++) {
-        const height = Math.random() * 5 + 2;
-        const geometry = new THREE.BoxGeometry(1, height, 1);
-        const material = new THREE.MeshPhongMaterial({ color: 0x808080 });
-        const building = new THREE.Mesh(geometry, material);
-        building.position.set(
-          Math.random() * 4 - 2,
-          height / 2,
-          Math.random() * 4 - 2
-        );
-        city.add(building);
-      }
-
-      city.position.set(x, 0, z);
-      scene.add(city);
-    };
-
-    createCity(30, 15);
-    createCity(-30, -15);
-
-    const createWaterfall = (x: number, y: number, z: number) => {
-      const waterfallGeometry = new THREE.PlaneGeometry(2, 10, 10, 10);
-      const waterfallMaterial = new THREE.MeshPhongMaterial({
-        color: 0x3498db,
-        transparent: true,
-        opacity: 0.8,
-      });
-      const waterfall = new THREE.Mesh(waterfallGeometry, waterfallMaterial);
-      waterfall.position.set(x, y, z);
-      waterfall.rotation.x = -Math.PI / 2;
-
-      // Animate waterfall
-      const positionAttribute = waterfallGeometry.getAttribute('position');
-      const animate = () => {
-        const time = Date.now() * 0.001;
-        for (let i = 0; i < positionAttribute.count; i++) {
-          const y = positionAttribute.getY(i);
-          const newY = y + Math.sin(time + i * 0.1) * 0.05;
-          positionAttribute.setY(i, newY);
+        const markingGeometry = new THREE.PlaneGeometry(1, 0.1);
+        const markingMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+        for (let j = -29; j < 30; j += 4) {
+          const marking = new THREE.Mesh(markingGeometry, markingMaterial);
+          marking.rotation.x = -Math.PI / 2;
+          marking.position.set(j, 0.11, 10 + (i * 3 - 1.5));
+          roadGroup.add(marking);
         }
-        positionAttribute.needsUpdate = true;
-        requestAnimationFrame(animate);
-      };
-      animate();
+      }
 
-      scene.add(waterfall);
+      return roadGroup;
     };
 
-    createWaterfall(-20, 10, 20);
+    const road = createRoad();
+    scene.add(road);
+
+    const createCar = (color: number) => {
+      const car = new THREE.Group();
+      
+      const bodyGeometry = new THREE.BoxGeometry(2, 0.5, 1);
+      const bodyMaterial = new THREE.MeshPhongMaterial({ color: color });
+      const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+      car.add(body);
+
+      const roofGeometry = new THREE.BoxGeometry(1.5, 0.4, 0.9);
+      const roof = new THREE.Mesh(roofGeometry, bodyMaterial);
+      roof.position.set(-0.1, 0.45, 0);
+      car.add(roof);
+
+      const wheelGeometry = new THREE.CylinderGeometry(0.2, 0.2, 0.1, 16);
+      const wheelMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
+      const wheelPositions = [
+        [-0.7, -0.25, 0.5],
+        [0.7, -0.25, 0.5],
+        [-0.7, -0.25, -0.5],
+        [0.7, -0.25, -0.5]
+      ];
+      wheelPositions.forEach(position => {
+        const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+        wheel.rotation.z = Math.PI / 2;
+        wheel.position.set(...position);
+        car.add(wheel);
+      });
+
+      return car;
+    };
+
+    const cars: THREE.Group[] = [];
+    const addCarsToRoad = () => {
+      const carColors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff];
+      for (let i = 0; i < 5; i++) {
+        const car = createCar(carColors[i]);
+        const lane = i % 2;
+        car.position.set(Math.random() * 50 - 25, 0.3, 10 + (lane * 3 - 1.5));
+        car.rotation.y = lane === 0 ? 0 : Math.PI;
+        scene.add(car);
+        cars.push(car);
+      }
+    };
+
+    addCarsToRoad();
+
+    const createFence = () => {
+      const fence = new THREE.Group();
+      const fencePostGeometry = new THREE.BoxGeometry(0.1, 1, 0.1);
+      const fencePostMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+      const fenceRailGeometry = new THREE.BoxGeometry(2, 0.1, 0.05);
+      const fenceRailMaterial = new THREE.MeshPhongMaterial({ color: 0xA0522D });
+
+      for (let i = 0; i < 8; i++) {
+        const post = new THREE.Mesh(fencePostGeometry, fencePostMaterial);
+        post.position.set(-7 + i * 2, 0.5, -3);
+        fence.add(post);
+
+        if (i < 7) {
+          const rail = new THREE.Mesh(fenceRailGeometry, fenceRailMaterial);
+          rail.position.set(-6 + i * 2, 0.8, -3);
+          fence.add(rail);
+        }
+      }
+
+      return fence;
+    };
+
+    const fence = createFence();
+    scene.add(fence);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
@@ -640,7 +666,6 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
           repeat: -1,
           ease: 'power1.inOut',
         });
-
         gsap.to(leftArm.rotation, {
           x: Math.PI / 4,
           duration: 1.5,
@@ -661,9 +686,144 @@ const FamilyScene: React.FC<FamilySceneProps> = ({
 
     familyMembers.forEach(animateFamilyMember);
 
+    const animateClouds = () => {
+      clouds.forEach((cloud, index) => {
+        cloud.position.x += Math.sin(Date.now() * 0.001 + index) * 0.02;
+        cloud.position.y += Math.cos(Date.now() * 0.002 + index) * 0.01;
+        
+        // Wrap clouds around when they move too far
+        if (cloud.position.x > 50) cloud.position.x = -50;
+        if (cloud.position.x < -50) cloud.position.x = 50;
+      });
+    };
+
+    const animateCars = () => {
+      cars.forEach((car, index) => {
+        const direction = index % 2 === 0 ? 1 : -1;
+        car.position.x += 0.1 * direction;
+        
+        // Wrap cars around when they move too far
+        if (car.position.x > 30) car.position.x = -30;
+        if (car.position.x < -30) car.position.x = 30;
+      });
+    };
+
+    const createSky = () => {
+      const skyGeometry = new THREE.SphereGeometry(500, 32, 32);
+      const skyMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          topColor: { value: new THREE.Color(0x0077ff) },
+          bottomColor: { value: new THREE.Color(0xffffff) },
+          offset: { value: 33 },
+          exponent: { value: 0.6 }
+        },
+        vertexShader: `
+          varying vec3 vWorldPosition;
+          void main() {
+            vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+            vWorldPosition = worldPosition.xyz;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform vec3 topColor;
+          uniform vec3 bottomColor;
+          uniform float offset;
+          uniform float exponent;
+          varying vec3 vWorldPosition;
+          void main() {
+            float h = normalize(vWorldPosition + offset).y;
+            gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(max(h, 0.0), exponent), 0.0)), 1.0);
+          }
+        `,
+        side: THREE.BackSide
+      });
+      return new THREE.Mesh(skyGeometry, skyMaterial);
+    };
+
+    const sky = createSky();
+    scene.add(sky);
+
+    let time = 0;
+    const updateDayNightCycle = () => {
+      time += 0.001;
+      const dayColor = new THREE.Color(0x87CEEB);
+      const nightColor = new THREE.Color(0x000033);
+      const currentColor = dayColor.lerp(nightColor, Math.sin(time) * 0.5 + 0.5);
+      sky.material.uniforms.topColor.value = currentColor;
+      directionalLight.intensity = Math.cos(time) * 0.5 + 0.5;
+    };
+
+    const createParticleSystem = (texture, count, size, area) => {
+      const particles = new THREE.BufferGeometry();
+      const positions = new Float32Array(count * 3);
+
+      for (let i = 0; i < count * 3; i += 3) {
+        positions[i] = Math.random() * area.x - area.x / 2;
+        positions[i + 1] = Math.random() * area.y;
+        positions[i + 2] = Math.random() * area.z - area.z / 2;
+      }
+
+      particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+      const material = new THREE.PointsMaterial({
+        size: size,
+        map: texture,
+        blending: THREE.AdditiveBlending,
+        depthTest: false,
+        transparent: true
+      });
+
+      return new THREE.Points(particles, material);
+    };
+
+    const fireflyTexture = new THREE.TextureLoader().load('path/to/firefly_texture.png');
+    const fireflies = createParticleSystem(fireflyTexture, 100, 0.1, { x: 40, y: 10, z: 40 });
+    scene.add(fireflies);
+
+    const createRainSystem = () => {
+      const rainGeometry = new THREE.BufferGeometry();
+      const rainCount = 15000;
+      const positions = new Float32Array(rainCount * 3);
+
+      for (let i = 0; i < rainCount * 3; i += 3) {
+        positions[i] = Math.random() * 400 - 200;
+        positions[i + 1] = Math.random() * 500 - 250;
+        positions[i + 2] = Math.random() * 400 - 200;
+      }
+
+      rainGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+      const rainMaterial = new THREE.PointsMaterial({
+        color: 0xaaaaaa,
+        size: 0.1,
+        transparent: true
+      });
+
+      return new THREE.Points(rainGeometry, rainMaterial);
+    };
+
+    const rain = createRainSystem();
+    scene.add(rain);
+
+    const animateRain = () => {
+      const positions = rain.geometry.attributes.position.array;
+      for (let i = 1; i < positions.length; i += 3) {
+        positions[i] -= 0.1 + Math.random() * 0.1;
+        if (positions[i] < -250) {
+          positions[i] = 250;
+        }
+      }
+      rain.geometry.attributes.position.needsUpdate = true;
+    };
+
     const animate = () => {
       requestAnimationFrame(animate);
       controls.update();
+      animateClouds();
+      animateCars();
+      updateDayNightCycle();
+      animateRain();
       renderer.render(scene, camera);
     };
 
